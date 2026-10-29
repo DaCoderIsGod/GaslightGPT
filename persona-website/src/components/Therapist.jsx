@@ -1,6 +1,6 @@
 import '../Chat.css';
 import React, { useState, useEffect, useRef } from 'react';
-import api from '../API';
+import api from '../api.jsx'
 
 export default function Theraphist() {  
     const [input, setInput] = useState('');
