@@ -1,4 +1,4 @@
-import '../App.css';
+import '../Chat.css';
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../API';
 
@@ -15,14 +15,11 @@ export default function Theraphist() {
     }, [messages]);
 
     async function get_Bot(userInput) {
-        console.log('fried');
         
         try {   
-            console.log('doing');
-            const response = await api.get(`/chat/therapist?input=${encodeURIComponent(userInput)}`, {
+            const response = await api.get(`/chat/trump?input=${encodeURIComponent(userInput)}`, {
                 timeout: 30000
             }); 
-            console.log(response);
             return response.data;
         } catch (error) {
             console.error("API Error:", error);
@@ -50,7 +47,7 @@ export default function Theraphist() {
 
     return (
         <>
-            <div className="header">Brutally Honest Theraphist</div>
+            <div className="header">Donald Trump</div>
             <div className="chat-area">
                 {messages.map((msg, index) => (
                     <div key={index} className={`bubble ${msg.role}`}>

@@ -1,40 +1,34 @@
 import os
-import ollama
+from dotenv import load_dotenv
+from groq import Groq
+load_dotenv()
+client = Groq(api_key=os.environ.get("GROQ_API_KEY"))
 
-def load_system_prompt(model_type: str) -> str:
-    prompt_files = {
-        'rude bot': 'rudebot_prompt.txt',
-        'therapist': 'therapist_prompt.txt',
-        'shakespear': 'shakespear_prompt.txt'
-    }
-    
-    file_name = prompt_files.get(model_type)
-    if file_name and os.path.exists(file_name):
-        with open(file_name, 'r') as f:
-            return f.read()
-            
-    return 'You are a normal nice chatbot'
-
-def chatbot(user_input: str, model_type: str, history: list = None) -> tuple[str, list]:
-    messages = list(history) if history else []
-    if len(messages) == 0:
-        system_prompt = load_system_prompt(model_type)
-        messages.append({"role": "system", "content": system_prompt})
-    messages.append({"role": "user", "content": user_input})
+def chatbot(user_input: str, model_type: str):
     try:
-        response = ollama.chat(
-            model='llama3.2',
-            messages=messages,
-            options={
-                'temperature': 1.1,
-                'frequency_penalty': 1.2
-            }
-        )
-        response_text = response['message']['content'] if isinstance(response, dict) else response.message.content
-        messages.append({"role": "assistant", "content": response_text})
+        system_prompt = "You are Donald Trump. Respond in your characteristic style."
+        prompt_file = f"{model_type}_prompt.txt"
         
-        return response_text, messages
+        if os.path.exists(prompt_file):
+            with open(prompt_file, 'r') as f:
+                system_prompt = f.read()
+
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_input}
+        ]
+        response = client.chat.completions.create(
+            model='openai/gpt-oss-120b',
+            messages=messages,
+            temperature=0.9,
+            stream=True
+        )
+
+        for chunk in response:
+            content = chunk.choices[0].delta.content
+            if content:
+                yield content
 
     except Exception as e:
-        print(f"Ollama Error: {e}")
-        raise e
+        print(f"GROQ ERROR: {e}")
+        yield f" Error: {str(e)}"
