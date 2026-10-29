@@ -1,15 +1,29 @@
 import '../App.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import api from '../API';
 
 export default function Theraphist() {  
     const [input, setInput] = useState('');
     const [messages, setMessages] = useState([]);
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    };
+    useEffect(() => {
+      scrollToBottom();
+    }, [messages]);
 
     async function get_Bot(userInput) {
+        console.log('fried');
+        
         try {   
-            let response = await api.get(`/chat/therapist?input=${userInput}`);
-            return response.data; 
+            console.log('doing');
+            const response = await api.get(`/chat/therapist?input=${encodeURIComponent(userInput)}`, {
+                timeout: 30000
+            }); 
+            console.log(response);
+            return response.data;
         } catch (error) {
             console.error("API Error:", error);
             return "Server error.";
@@ -43,6 +57,7 @@ export default function Theraphist() {
                         {msg.content}
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
             <form id="footer" onSubmit={handle}>
                 <input 
